@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Velha</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+        }
+
+        #game-board {
+            border: 2px solid #333;
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 4px;
+            background-color: #3498db; /* Cor de fundo do tabuleiro */
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid #333;
+            color: #ecf0f1; /* Cor do texto X e O */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .cell:hover {
+            background-color: #2980b9; /* Cor de destaque ao passar o mouse */
+        }
+
+        .x {
+            color: #e74c3c; /* Cor do X */
+        }
+
+        .o {
+            color: #2ecc71; /* Cor do O */
+        }
+
+        #status {
+            text-align: center;
+            font-size: 20px;
+            margin-top: 20px;
+            color: #333;
+        }
+
+        #restart-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #message {
+            text-align: center;
+            font-size: 24px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-board"></div>
+    <div id="status">Jogo da Velha</div>
+    <div id="message"></div>
+    <button id="restart-btn" onclick="restartGame()">Reiniciar Partida</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const board = document.getElementById('game-board');
+            const status = document.getElementById('status');
+            const restartBtn = document.getElementById('restart-btn');
+            const message = document.getElementById('message');
+            const cells = Array.from({ length: 9 }, (_, index) => createCell(index));
+
+            let currentPlayer = 'X';
+            let isGameOver = false;
+
+            function createCell(index) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.addEventListener('click', () => handleCellClick(index));
+                return cell;
+            }
+
+            function handleCellClick(index) {
+                if (!isGameOver && !cells[index].textContent) {
+                    cells[index].textContent = currentPlayer;
+                    cells[index].classList.add(currentPlayer.toLowerCase());
+                    turn++;
+                    checkWinner();
+                    switchPlayer();
+                    makeRobotMove();
+                }
+            }
+
+            function switchPlayer() {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            }
+
+            function makeRobotMove() {
+                if (!isGameOver) {
+                    const emptyCells = cells.filter(cell => !cell.textContent);
+                    if (emptyCells.length > 0) {
+                        const randomIndex = Math.floor(Math.random() * emptyCells.length);
+                        const robotMove = emptyCells[randomIndex];
+                        robotMove.textContent = currentPlayer;
+                        robotMove.classList.add(currentPlayer.toLowerCase());
+                        turn++;
+                        checkWinner();
+                        switchPlayer();
+                    }
+                }
+            }
+
+            function checkWinner() {
+                // Implement your winning logic here
+                // You can check rows, columns, and diagonals to determine the winner.
+                // For simplicity, this example does not include the full winning logic.
+                if (turn >= 5) {
+                    const winningCombinations = [
+                        [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+                        [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+                        [0, 4, 8], [2, 4, 6]             // Diagonals
+                    ];
+
+                    for (const combination of winningCombinations) {
+                        const [a, b, c] = combination;
+                        if (
+                            cells[a].textContent &&
+                            cells[a].textContent === cells[b].textContent &&
+                            cells[a].textContent === cells[c].textContent
+                        ) {
+                            endGame(cells[a].textContent + ' Venceu!');
+                            return;
+                        }
+                    }
+
+                    if (turn === 9) {
+                        endGame('Empate! O jogo acabou.');
+                    }
+                }
+            }
+
+            function endGame(result) {
+                isGameOver = true;
+                status.textContent = result;
+                message.textContent = result;
+            }
+
+            function restartGame() {
+                cells.forEach(cell => {
+                    cell.textContent = '';
+                    cell.classList.remove('x', 'o');
+                });
+
+                currentPlayer = 'X';
+                turn = 0;
+                isGameOver = false;
+                status.textContent = 'Jogo da Velha';
+                message.textContent = '';
+            }
+
+            let turn = 0;
+
+            cells.forEach(cell => board.appendChild(cell));
+        });
+    </script>
+</body>
+</html>
